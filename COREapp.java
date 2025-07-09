@@ -55,7 +55,7 @@ public class COREapp extends JFrame {
     public int growth_mode;
 
     public COREapp() {
-        setTitle("RINGwars Visualizer --v04.12.2024");
+        setTitle("RINGwars Visualizer --v2.0");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //set default world values...size, fernies per round, etc
@@ -404,7 +404,7 @@ public class COREapp extends JFrame {
         String[] agArray = new String[ ag_names.size() ];
         ag_names.toArray( agArray );
         //this.sim = new Simulation(this.wSize,agArray,agentLookup,gpturn,maxNumSoldiers,startcount,visibility_range,growth_mode,absorbMode);
-        this.sim = new Simulation(this.wSize, this.active_agents, maxNumSoldiers, startcount, visibility_range, gpturn,agentLookup);
+        this.sim = new Simulation(this.wSize, this.active_agents, maxNumSoldiers, startcount, visibility_range, gpturn, 5,agentLookup);
         this.step = 1;
         this.displayStep = 1;
         //this.displaySuperStep = sim.superStep;
@@ -635,6 +635,8 @@ public class COREapp extends JFrame {
         private Image[] yellowFaces;
         private Image[] otherFaces;
         private HashMap<Integer, Image[]> whichFace;
+
+        private Image rightArrow;
     
         // Constructor or initialization block to load the GIF
         public DisplayPanel() {
@@ -668,7 +670,8 @@ public class COREapp extends JFrame {
             whichFace.put(2,greenFaces);
             whichFace.put(3,yellowFaces);
             whichFace.put(4,otherFaces); //add different images later
-            
+            //resolve direction arrows
+            rightArrow = new ImageIcon("src/rightArrow.gif").getImage();
         }
 
         public Image whichFaceGet(int fint) {
@@ -812,8 +815,19 @@ public class COREapp extends JFrame {
             g.setColor(Color.WHITE);
             g.fillOval(centerX - innerRadius, centerY - innerRadius, 2 * innerRadius, 2 * innerRadius);
 
+            //Draw the arrows for resolve direction
+            
+            //if (drawState.resolve_dir == 1) {
+            //    g.drawImage(rightArrow, centerX-20, centerY-20, this);
+            //}
+
             if (drawState.victory & !singleMode) {
-                String victor = (String) drawState.active_agents.toArray()[0];
+                String victor = "N";
+                for (String s : drawState.player_totals.keySet()) {
+                    if (drawState.player_totals.get(s) > 0) {
+                        victor = s;
+                    }
+                }
                 Color vicColor = agentLookup.get(victor).getColor();
                 g.setColor(vicColor);
                 g.fillOval(centerX - innerRadius, centerY - innerRadius, 2 * innerRadius, 2 * innerRadius);
@@ -856,6 +870,24 @@ public class COREapp extends JFrame {
                     g.drawString("(" + String.valueOf(yy) + ") " + move.agent.locname + " places " + String.valueOf(move.change) + " at " + String.valueOf(move.loc) + " (+" + String.valueOf(aStart) + ")", 10, 70+(yy*10));
                     yy++;
                 }
+                for (Agent_Details ag : sim.agents) {
+                    int tot = drawState.get_player_total(ag);
+                    g.drawString(">>> " + ag.locname + " has " + tot + " fernies", 10, 70+(yy*10));
+                    yy++;
+                }
+                if (drawState.resolve_dir == 1) {
+                    g.drawString("BATTLES COUNTERCLOCKWISE", 10, 70+(yy*10));
+                    yy++;
+                    g.drawString("FROM NODE: " + (int) wSize/4, 10, 70+(yy*10));
+                    yy++;
+                }
+                if (drawState.resolve_dir == 0) {
+                    g.drawString("BATTLES CLOCKWISE", 10, 70+(yy*10));
+                    yy++;
+                    g.drawString("FROM NODE: " + (int) 3*wSize/4, 10, 70+(yy*10));
+                    yy++;
+                }
+                
             }
         }
     }

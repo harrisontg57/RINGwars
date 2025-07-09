@@ -14,11 +14,13 @@ public class World {
         private Node right;
         public int soldiers;
         public String owner;
+        public int max_soldiers;
 
         public Node(int index) {
             this.index = index;
             this.soldiers = 0;
             this.owner = "N";
+            this.max_soldiers = 0;
         }
 
         public String toString() {
@@ -38,11 +40,15 @@ public class World {
             if (this.soldiers == 0) {
                 this.setOwner("N");
             }
+            //delete excess soldiers here.
+            if (this.soldiers > this.max_soldiers) {
+                this.soldiers = this.max_soldiers;
+            }
         }
 
         public void addSoldiers(Agent_Details agent, int additional_soldiers) {
             //at this stage we assume the move is legal
-            //delete excess soldiers here.
+            
             String agent_name = agent.locname;
             if (this.owner.equals("N") | this.owner.equals(agent_name)) {
                 this.owner = agent_name;
@@ -137,6 +143,7 @@ public class World {
         for (int i = 0; i < numNodes; i++) {
             nodes_tmp[i].setRight(nodes_tmp[(i + 1) % numNodes]);
             nodes_tmp[i].setLeft(nodes_tmp[(i - 1 + numNodes) % numNodes]);
+            nodes_tmp[i].max_soldiers = this.max_soldiers;
         }
 
         // Set the head to the first node
@@ -161,6 +168,18 @@ public class World {
 
     public void resolve(int direction) {
         int start = (int) this.numNodes/4; //in future this will be randomized or at least vary
+        //starting point is safe from triple battles
+        if (direction == 1) {
+            //resolve right
+            start = start*1; //start at "top"
+        } 
+        if (direction == 0) {
+            //resolve left
+            start = start*3; //start at "bottom"
+        }
+
+        if (direction == 1) {
+            //right resolve
         for (int i = start; i < start + numNodes; i++) {
             Node node  = nodes.get(i%numNodes);
             if (node.getOwner().equals(node.getRight().getOwner()) | node.getOwner().equals("N") | (node.getRight().getOwner().equals("N"))) {
@@ -170,7 +189,70 @@ public class World {
                     i = i + skip;
                 }
             }
+        } else {
+            //left resolve
+            for (int i = start; i > -(numNodes-start); i--) {
+                //System.out.println((numNodes+i)%numNodes);
+                Node node  = nodes.get((numNodes+i)%numNodes);
+                if (node.getOwner().equals(node.getLeft().getOwner()) | node.getOwner().equals("N") | (node.getLeft().getOwner().equals("N"))) {
+                    continue;
+                } else {
+                    int skip = this.fight_left(node);
+                    i = i + skip;
+                }
+            }
+        }
     }
+
+    public int fight_left(Node node) {
+        Node lnode = node.getLeft();
+        Node llnode = lnode.getLeft();
+        if (llnode.getOwner() == node.getOwner()) {
+            //trip battle
+            if (lnode.getSoldiers() == node.getSoldiers() + llnode.getSoldiers()) {
+                //all cancel out
+                node.setSoldiers(0); //automatically sets owner to "N"
+                lnode.setSoldiers(0);
+                llnode.setSoldiers(0);
+                return -2;
+            }
+            if (lnode.getSoldiers() > node.getSoldiers() + llnode.getSoldiers()) {
+                //center node (rnode) owns both sides
+                //just takes ownership, doesn't rearrange anything
+                node.setOwner(lnode.getOwner());
+                llnode.setOwner(lnode.getOwner());
+                return -2;
+            }
+            if (lnode.getSoldiers() < node.getSoldiers() + llnode.getSoldiers()) {
+                //center node (rnode) owns both sides
+                //just takes ownership, doesn't rearrange anything
+                lnode.setOwner(node.getOwner());
+                return -2;
+            }
+        }
+
+        if (lnode.getSoldiers() == node.getSoldiers()) {
+            //soldiers cancel each other out.
+            node.setSoldiers(0); //automatically sets owner to "N"
+            lnode.setSoldiers(0);
+            return -1;
+        }
+        if (lnode.getSoldiers() < node.getSoldiers()) {
+            //soldiers of rnode are absorbed into node.
+            node.addSoldiers(this.agentLookup.get(node.getOwner()), lnode.getSoldiers());
+            lnode.setSoldiers(0);
+            return -1;
+        }
+        if (lnode.getSoldiers() > node.getSoldiers()) {
+            //soldiers of rnode are absorbed into node.
+            lnode.addSoldiers(this.agentLookup.get(lnode.getOwner()), node.getSoldiers());
+            node.setSoldiers(0);
+            return -1;
+        }
+
+        return 0;
+    }
+    
 
     public int fight_right(Node node) {
         Node rnode = node.getRight();

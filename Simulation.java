@@ -15,7 +15,8 @@ public class Simulation {
     private int scale; //Size of the ring
     public World world;
     public Agent_Details[] agents;
-    public int soldiersPerTurn;
+    public double fixedGrowthperTurn;
+    public double ownershipBonusGrowth;
     public int visibility_range;
     public int max_soldiers;
 
@@ -26,11 +27,12 @@ public class Simulation {
     public HashSet<String> active_agents;
     public HashMap<String, Agent_Details> agentLookup;
 
-    public Simulation(int scale, Agent_Details[] agents, int max_soldiers, int starting_soldiers, int visibility_range, int perTurn, HashMap<String, Agent_Details> agentLookup){
+    public Simulation(int scale, Agent_Details[] agents, int max_soldiers, int starting_soldiers, int visibility_range, int perTurn, int bonusPerTurn, HashMap<String, Agent_Details> agentLookup){
         this.scale = scale;
 
         this.agents = agents; //not yet connected.
-        this.soldiersPerTurn = perTurn;
+        this.fixedGrowthperTurn = ((double) perTurn) / 100.0;
+        this.ownershipBonusGrowth = ((double) bonusPerTurn) / 100.0;
         this.visibility_range = visibility_range;
         this.max_soldiers = max_soldiers;
 
@@ -54,23 +56,26 @@ public class Simulation {
         for (Agent_Details a : this.agents) {
             active_agents.add(a.locname);  
         }
-        World_State ws = new World_State(this.world, 0, new ArrayList<>(), false, active_agents);
+        World_State ws = new World_State(this.world, 0, new ArrayList<>(), false, active_agents, this.step%2);
         state_history.add(ws);
     }
     
-    public int make_state_file(Agent_Details agent, int step, double grow_percent) {
+    public int make_state_file(Agent_Details agent, int step, double grow_percent, double bonus_grow_percent) {
         List<World.Node_State> myView = this.world.get_perspective(agent);
         int total_soldiers = 0;
         String counts = "";
         String owners = "";
+        int total_nodes = 0;
         for (World.Node_State s: myView) {
             counts = counts + s.count() + ",";
             owners = owners + s.owner() + ",";
             if (s.owner().equals("Y")) { //THIS SEEMS LIKE ITS WRONG...
                 total_soldiers = total_soldiers + s.count();
+                total_nodes++;
             }
         }
-        int grow = (int) (total_soldiers * grow_percent);
+        double bonus = 1.0 + (bonus_grow_percent*total_nodes);
+        int grow = (int) (total_soldiers * grow_percent * bonus);
         String c_string = counts.substring(0, counts.length() - 1);
         String o_string = owners.substring(0, owners.length() - 1);
         try {
@@ -202,9 +207,9 @@ public class Simulation {
         //first merge moves so that there's only one per node..
         ArrayList<Integer> total_moves = new ArrayList<>(Collections.nCopies(this.scale, 0)); //this needs to be a full array of the full ring
         int total_change = 0;
-        System.out.println(total_moves.size());
+        //System.out.println(total_moves.size());
         for (Movement move : moves) {
-            System.out.println("MOVE: " + move.loc);
+            //System.out.println("MOVE: " + move.loc);
             int tmp = total_moves.get(move.loc);
             tmp = tmp + move.change;
             total_moves.set(move.loc, tmp);
@@ -212,22 +217,25 @@ public class Simulation {
         }
         if (total_change > newSoldiers) {
             //added too many new soldiers
+            System.out.println(agent.locname + " made an illegal move");
             return new ArrayList<Movement>(); //return an empty list since there is an illegal move
         }
         //then analyze them
         List<World.Node_State> aworld = this.world.get_perspective(agent);
         int i = 0;
-        System.out.println(total_moves.size());
+        //System.out.println(total_moves.size());
         for (int move : total_moves) {
-            System.out.println(i);
+            //System.out.println(i);
             World.Node_State state = aworld.get(i);
             if (move < 0) {
                 if (state.owner() != agent.locname) {
                     //removing from an opponent
+                    System.out.println(agent.locname + " made an illegal move");
                     return new ArrayList<Movement>(); //return an empty list since there is an illegal move
                 }
                 if (state.count() < move*-1) {
                     //too few soldiers to remove that many
+                    System.out.println(agent.locname + " made an illegal move");
                     return new ArrayList<Movement>(); 
                 }
             }
@@ -235,6 +243,7 @@ public class Simulation {
                 int gloc = (agent.myStart + i)%this.scale;
                 if(world.nodes.get(gloc).visible_in_range(agent.locname, this.visibility_range) != 1) {
                     //node out of range of owned nodes
+                    System.out.println(agent.locname + " made an illegal move");
                     return new ArrayList<Movement>();
                 }
             }
@@ -264,7 +273,8 @@ public class Simulation {
         ArrayList<ArrayList<Movement>> bothMoves = new ArrayList<>();
         ArrayList<Movement> bothMoves_combo = new ArrayList<>();
         for (Agent_Details agent: agents) {
-            int grow = this.make_state_file(agent, this.step, 0.5);
+            int grow = this.make_state_file(agent, this.step, this.fixedGrowthperTurn, this.ownershipBonusGrowth);
+            //grow now includes the bonus growth
             this.commandAgent(agent, this.step, grow);
             ArrayList<Movement> moves = this.readMove(agent); //should return an empty arraylist if the moves were illegal.
             moves = this.check_legal(agent, moves, grow);
@@ -281,10 +291,14 @@ public class Simulation {
             this.world.getNode(gi).addSoldiers(move.agent, move.change);
         }
         //EDGE BATTLES
-        this.world.resolve(1);
+        int resolve_dir = this.step%2;
+        this.world.resolve(resolve_dir);
+
+        //Check for Victory
+        //right now it happens when world_state object is created.
 
         //bothMoves_combo actually needs to store the state after the edge battle...
-        World_State ws = new World_State(world, step, bothMoves_combo, false, active_agents);
+        World_State ws = new World_State(world, step, bothMoves_combo, false, active_agents,resolve_dir);
         state_history.add(ws);
         this.step++;
     }
@@ -308,17 +322,25 @@ public class Simulation {
     //public int superStep;
     public List<Integer> counts;
     public List<Color> owners; //made it colors for convienience.
-    ArrayList<Movement> moves;
+    public ArrayList<Movement> moves;
     public Boolean victory;
+    public int resolve_dir;
     public HashSet<String> active_agents;
-    public World_State(World w, int step, ArrayList<Movement> moves, Boolean victory, HashSet<String> active_agents) {
+    public HashMap<String, Integer> player_totals;
+    public World_State(World w, int step, ArrayList<Movement> moves, Boolean victory, HashSet<String> active_agents, int resolve_dir) {
         this.step = step;
         //this.superStep = superStep;
         this.counts = new ArrayList<>();
         this.owners = new ArrayList<>();
         this.moves = moves;
+        this.resolve_dir = resolve_dir;
         this.victory = victory;
         this.active_agents = active_agents;
+        this.player_totals = new HashMap<>();
+        for (String a : active_agents) {
+            this.player_totals.put(a, 0);
+        }
+
         for (int i = 0; i < w.nodes.size(); i++) {
             World.Node node = w.nodes.get(i);
             this.counts.add(node.getSoldiers());
@@ -333,10 +355,20 @@ public class Simulation {
                 //System.out.println(agentLookup.get(w.anonToName.get(anonOwner)));
                 //System.out.println();
                 c = agentLookup.get(anonOwner).getColor();
+                int tmp_count = this.player_totals.get(anonOwner);
+                this.player_totals.put(anonOwner,tmp_count+node.getSoldiers());
                 //c = Color.BLUE;
             }
             this.owners.add(c);
         }
+        for (int s : this.player_totals.values()) {
+            if (s == 0) {
+                this.victory = true; //OBVIOUSLY THIS FUNCTION ONLY WORKS WITH 2 PLAYERS
+            }
+        }
+    }
+    public int get_player_total(Agent_Details agent) {
+        return this.player_totals.get(agent.locname);
     }
     public String toString() {
         return this.owners.toString();
