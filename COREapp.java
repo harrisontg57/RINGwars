@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 import jdk.jfr.Timespan;
+
+import java.util.List;
+import java.util.Map;
 
 public class COREapp extends JFrame {
 
@@ -178,6 +182,69 @@ public class COREapp extends JFrame {
         absorbModeItem.setToolTipText("Determines whether edge battles resolve in aborbing conquered fernies or deleting them from the conquerors count");
         JMenuItem addAgentItem = new JMenuItem("Add Agent");
         addAgentItem.addActionListener(e -> createAddAgentPopup());
+
+        JMenuItem saveSettings = new JMenuItem("Save Settings");
+        saveSettings.addActionListener(e -> {
+            // Create popup
+            JDialog dialog = new JDialog(this, "Save Settings", true);
+            dialog.setLayout(new BorderLayout());
+            dialog.setSize(300, 150);
+            dialog.setLocationRelativeTo(this);
+
+            // Create panel with label + text field
+            JPanel savePanelPopup = new JPanel(new FlowLayout());
+            JLabel savePanelLabel = new JLabel("Save Name:");
+            JTextField savePanelField = new JTextField(15);
+            savePanelPopup.add(savePanelLabel);
+            savePanelPopup.add(savePanelField);
+
+            // Create Save button
+            JButton saveButton = new JButton("Save");
+            saveButton.addActionListener(ae -> {
+                String save_name = savePanelField.getText();
+                saveSettings(save_name + ".json");
+                dialog.dispose();
+            });
+
+            // Add components to dialog
+            dialog.add(savePanelPopup, BorderLayout.CENTER);
+            dialog.add(saveButton, BorderLayout.SOUTH);
+
+            dialog.setVisible(true);
+        });
+        
+        JMenuItem loadSettings = new JMenuItem("Load Settings");
+        loadSettings.addActionListener(e -> {
+            File folder = new File("saves/agents/");
+            if (!folder.exists() || !folder.isDirectory()) {
+                JOptionPane.showMessageDialog(this, "No 'saves/agents/' folder found.");
+                return;
+            }
+
+            // Filter for .json files
+            String[] saveFiles = folder.list((dir, name) -> name.endsWith(".json"));
+
+            if (saveFiles == null || saveFiles.length == 0) {
+                JOptionPane.showMessageDialog(this, "No saved settings found in 'saves/agents/' folder.");
+                return;
+            }
+
+            // Show popup with a combo box of files
+            JComboBox<String> fileList = new JComboBox<>(saveFiles);
+            int result = JOptionPane.showConfirmDialog(
+                this,
+                fileList,
+                "Choose Save File",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (result == JOptionPane.OK_OPTION) {
+                String selectedFile = (String) fileList.getSelectedItem();
+                loadSettings(selectedFile);  // <- Load selected file
+            }
+        });
+
         menu.add(sizeItem);
         menu.add(growthItem);
         menu.add(startItem);
@@ -186,10 +253,13 @@ public class COREapp extends JFrame {
         menu.add(singleAgentModeItem);
         menu.add(absorbModeItem);
         menu.add(addAgentItem);
+        menu.add(saveSettings);
+        menu.add(loadSettings);
         menuBar.add(menu);
         menuPanel.add(menuBar, BorderLayout.NORTH);
         bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         menuBar.add(bottomPanel, BorderLayout.SOUTH);
+
         //Create settings panel
         JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         worldSize = new JLabel("World Size: 20");
@@ -386,6 +456,7 @@ public class COREapp extends JFrame {
         // Add the tabbed pane to the frame
         add(tabbedPane);
     }
+
     private void reloadSim() {
         ArrayList<String> ag_names = new ArrayList<>();
         ArrayList<Agent_Details> myAgents = new ArrayList<>();
@@ -471,6 +542,7 @@ public class COREapp extends JFrame {
         }
         updateSimulation(); // Placeholder
     }
+    
     private void stepBackward() {
         // Add code to step backward in the simulation
         //move back a step
@@ -505,12 +577,14 @@ public class COREapp extends JFrame {
         temp.revalidate();
         temp.repaint();
     }
+    
     private void updateMax(int maxx) {
         maxSoldiers.setText("Max Fernies per Node: "+String.valueOf(maxx));
         Component temp = maxSoldiers.getParent();
         temp.revalidate();
         temp.repaint();
     }
+    
     private void updateVis(int maxx) {
         visRange.setText("Visibility Range: "+String.valueOf(maxx));
         Component temp = visRange.getParent();
@@ -622,6 +696,126 @@ public class COREapp extends JFrame {
         bottomPanel.add(agentButton);
         bottomPanel.revalidate(); // Refresh panel to show new button
     }
+
+    private void saveSettings(String filename) {
+        List<Map<String, Object>> agentList = new ArrayList<>();
+
+        for (Agent_Details ad : agent_set) {
+            Map<String, Object> agentMap = new HashMap<>();
+            agentMap.put("filename", ad.filename);
+            agentMap.put("locname", ad.locname);
+            agentMap.put("lang", ad.lang);
+            Color c = ad.color;
+            String hexColor = String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
+            agentMap.put("color", hexColor);
+            agentList.add(agentMap);
+        }
+
+        // Ensure "saves/" folder exists
+        File saveDir = new File("saves");
+        if (!saveDir.exists()) {
+            saveDir.mkdirs();
+        }
+
+        File saveAgentDir = new File("saves/agents");
+        if (!saveAgentDir.exists()) {
+            saveAgentDir.mkdirs();
+        }
+
+        // Build JSON
+        StringBuilder sb = new StringBuilder();
+        sb.append("[\n");
+        for (int i = 0; i < agentList.size(); i++) {
+            Map<String, Object> agent = agentList.get(i);
+            sb.append("  {\n");
+            int count = 0;
+            for (Map.Entry<String, Object> entry : agent.entrySet()) {
+                sb.append("    \"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
+                count++;
+                sb.append(count < agent.size() ? ",\n" : "\n");
+            }
+            sb.append(i < agentList.size() - 1 ? "  },\n" : "  }\n");
+        }
+        sb.append("]\n");
+
+        // Save to file inside the folder
+        try (FileWriter writer = new FileWriter("saves/agents/" + filename)) {
+            writer.write(sb.toString());
+            System.out.println("✅ Saved to saves/" + filename);
+        } catch (IOException e) {
+            System.err.println("❌ Failed to write file: " + e.getMessage());
+        }
+    }
+
+    private List<Map<String, Object>> parseJson(String jsonString) {
+        List<Map<String, Object>> agentList = new ArrayList<>();
+
+        jsonString = jsonString.trim();
+        if (jsonString.startsWith("[")) jsonString = jsonString.substring(1);
+        if (jsonString.endsWith("]")) jsonString = jsonString.substring(0, jsonString.length() - 1);
+
+        // Split by JSON objects
+        String[] objects = jsonString.split("\\},\\s*\\{");
+        for (String obj : objects) {
+            obj = obj.trim();
+            if (!obj.startsWith("{")) obj = "{" + obj;
+            if (!obj.endsWith("}")) obj = obj + "}";
+
+            Map<String, Object> map = new HashMap<>();
+            obj = obj.substring(1, obj.length() - 1); // remove braces
+            String[] lines = obj.split(",(?=\\s*\"|\\s*[a-zA-Z0-9_]+\\s*:)");
+
+            for (String line : lines) {
+                String[] parts = line.trim().split(":", 2);
+                if (parts.length == 2) {
+                    String key = parts[0].replaceAll("\"", "").trim();
+                    String value = parts[1].replaceAll("\"", "").trim();
+                    map.put(key, value);
+                }
+            }
+
+            agentList.add(map);
+        }
+
+        return agentList;
+    }
+
+    private void loadSettings(String filename) {
+        // 🧹 Step 1: Clear existing data
+        agent_set.clear();
+        agentLookup.clear();
+        faceLookup.clear();
+        aCount = new Random().nextInt(4);  // Reset face index
+
+        // 🧹 Step 2: Remove all components from the bottomPanel (agent buttons)
+        bottomPanel.removeAll();
+        bottomPanel.revalidate();
+        bottomPanel.repaint();
+
+        // 🧪 Step 3: Load the file
+        try (BufferedReader reader = new BufferedReader(new FileReader("saves/agents/" + filename))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            String jsonString = sb.toString();
+            List<Map<String, Object>> agentList = parseJson(jsonString);
+            for (Map<String, Object> agent : agentList) {
+                String file = (String) agent.get("filename");
+                String locname = (String) agent.get("locname");
+                String lang = (String) agent.get("lang");
+                String colorHex = (String) agent.get("color");
+                Color color = Color.decode(colorHex);
+                addAgent(file, locname, lang, color);
+                addAgentButton(file, locname, color);
+            }
+            System.out.println("✅ Loaded " + filename);
+        } catch (IOException e) {
+            System.err.println("❌ Failed to read " + filename + ": " + e.getMessage());
+        }
+    }
+
     class DisplayPanel extends JPanel {
         private Image gifImage;
         private Image shrunkFace;
