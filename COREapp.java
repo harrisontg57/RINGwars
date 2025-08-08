@@ -1,4 +1,3 @@
-import com.sun.jdi.connect.Connector;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,16 +9,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
-
-import jdk.jfr.Timespan;
-
-import java.util.List;
-import java.util.Map;
 
 public class COREapp extends JFrame {
 
@@ -57,6 +53,16 @@ public class COREapp extends JFrame {
     public Boolean singleMode;
     public Boolean absorbMode;
     public int growth_mode;
+    private JButton addAgentButton;
+    private JButton worldSizeButton;
+    private JButton growthPerTurnButton;
+    private JButton startingFerniesButton;
+    private JButton maxPerTileButton;
+    private JButton visibilityRangeButton;
+    private JButton singleAgentModeButton;
+    private JButton absorbModeButton;
+    private JButton saveSettingsButton;
+    private JButton loadSettingsButton;
 
     public COREapp() {
         setTitle("RINGwars Visualizer --v2.0");
@@ -107,19 +113,31 @@ public class COREapp extends JFrame {
         startPanel.add(flavourPanel,BorderLayout.CENTER);
         tabbedPane.addTab("Welcome", startPanel);
 
+        // ---------------------------------------------------------------------------------------------------
+        //                                        Settings Panel V1
+        // ---------------------------------------------------------------------------------------------------
         // Menu Panel with JMenuBar
         JPanel menuPanel = new JPanel(new BorderLayout());
         JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu();
-        ImageIcon settingsIcon = new ImageIcon("src/SimSettings.gif","this is a caption");
-        menu.setIcon(settingsIcon);
-        JMenuItem sizeItem = new JMenuItem("Set Ring Size");
+        //JMenu menu = new JMenu();
+        //ImageIcon settingsIcon = new ImageIcon("src/SimSettings.gif","this is a caption");
+        //menu.setIcon(settingsIcon);
+        JLabel agentListLabel = new JLabel();
+        ImageIcon agentListIconOrg = new ImageIcon("src/agentList.png");
+        Image agentListIconOrgScaledImage = agentListIconOrg.getImage().getScaledInstance(140, 42, Image.SCALE_SMOOTH);
+        ImageIcon agentListIconResized = new ImageIcon(agentListIconOrgScaledImage);
+        agentListLabel.setIcon(agentListIconResized);
+
+        /*JMenuItem sizeItem = new JMenuItem("Set Ring Size");
         sizeItem.addActionListener(e -> {
             int worldsize = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter new world size:"));
             // Implement size change logic here
             wSize = worldsize;
             updateWorldSize(worldsize);
         });
+        */
+
+        /*
         JMenuItem growthItem = new JMenuItem("Set Fernie Growth per Turn");
         growthItem.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Percent Growth per Turn:"));
@@ -127,6 +145,9 @@ public class COREapp extends JFrame {
             gpturn = tmp;
             updateGPTurn(tmp);
         });
+        */
+
+        /*
         JMenuItem startItem = new JMenuItem("Set Starting Fernies");
         startItem.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Starting Fernies:"));
@@ -134,6 +155,9 @@ public class COREapp extends JFrame {
             startcount = tmp;
             updateStartCount(tmp);
         });
+        */
+
+        /*
         JMenuItem maxItem = new JMenuItem("Set Max per Tile");
         maxItem.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Maximum:"));
@@ -141,6 +165,9 @@ public class COREapp extends JFrame {
             maxNumSoldiers = tmp;
             updateMax(tmp);
         });
+        */
+
+        /*
         JMenuItem visItem = new JMenuItem("Set Visibility Range");
         visItem.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Visibility Range:"));
@@ -148,6 +175,9 @@ public class COREapp extends JFrame {
             visibility_range = tmp;
             updateVis(tmp);
         });
+        */
+
+        /*
         JMenuItem singleAgentModeItem = new JMenuItem("Set to Single Agent Mode");
         singleAgentModeItem.addActionListener(e -> {
             if (this.singleMode) {
@@ -164,6 +194,9 @@ public class COREapp extends JFrame {
             temp.repaint();
         });
         singleAgentModeItem.setToolTipText("For experimenting with agent strategies.");
+        */
+
+        /*
         JMenuItem absorbModeItem = new JMenuItem("Set to Cancel Mode");
         absorbModeItem.addActionListener(e -> {
             if (!this.absorbMode) {
@@ -180,9 +213,12 @@ public class COREapp extends JFrame {
             temp.repaint();
         });
         absorbModeItem.setToolTipText("Determines whether edge battles resolve in aborbing conquered fernies or deleting them from the conquerors count");
-        JMenuItem addAgentItem = new JMenuItem("Add Agent");
-        addAgentItem.addActionListener(e -> createAddAgentPopup());
+        */
 
+        //JMenuItem addAgentItem = new JMenuItem("Add Agent");
+        //addAgentItem.addActionListener(e -> createAddAgentPopup());
+
+        /* 
         JMenuItem saveSettings = new JMenuItem("Save Settings");
         saveSettings.addActionListener(e -> {
             // Create popup
@@ -212,7 +248,9 @@ public class COREapp extends JFrame {
 
             dialog.setVisible(true);
         });
+        */
         
+        /*
         JMenuItem loadSettings = new JMenuItem("Load Settings");
         loadSettings.addActionListener(e -> {
             File folder = new File("saves/agents/");
@@ -244,61 +282,238 @@ public class COREapp extends JFrame {
                 loadSettings(selectedFile);  // <- Load selected file
             }
         });
+        */
 
-        menu.add(sizeItem);
-        menu.add(growthItem);
-        menu.add(startItem);
-        menu.add(maxItem);
-        menu.add(visItem);
-        menu.add(singleAgentModeItem);
-        menu.add(absorbModeItem);
-        menu.add(addAgentItem);
-        menu.add(saveSettings);
-        menu.add(loadSettings);
-        menuBar.add(menu);
+        //menu.add(sizeItem);
+        //menu.add(growthItem);
+        //menu.add(startItem);
+        //menu.add(maxItem);
+        //menu.add(visItem);
+        //menu.add(singleAgentModeItem);
+        //menu.add(absorbModeItem);
+        //menu.add(addAgentItem);
+        //menu.add(saveSettings);
+        //menu.add(loadSettings);
+        //menuBar.add(menu);
+        menuBar.add(agentListLabel);
         menuPanel.add(menuBar, BorderLayout.NORTH);
         bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         menuBar.add(bottomPanel, BorderLayout.SOUTH);
 
-        //Create settings panel
-        JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        worldSize = new JLabel("World Size: 20");
-        perTurn = new JLabel("Percent Growth per Turn: 10");
+        //JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        //worldSize = new JLabel("World Size: 20");
+        //perTurn = new JLabel("Percent Growth per Turn: 10");
         //simSpeed = new JLabel("Simulation Play Speed: 100 ms");
-        visRange = new JLabel("Visibility Range: 5");
-        maxSoldiers = new JLabel("Max Fernies per Node: 10000");
-        startCLabel = new JLabel("Starting Fernies: 75");
-        singleAgentMode = new JLabel("Multi Agent Mode");
-        absorbModeLabel = new JLabel("Currently in Absorb Mode");
-        compModeLabel = new JLabel("Experimental Mode");
-        JLabel newLineHolder = new JLabel("\n");
-        settingsPanel.setLayout(new GridLayout(0, 1));
+        //visRange = new JLabel("Visibility Range: 5");
+        //maxSoldiers = new JLabel("Max Fernies per Node: 10000");
+        //startCLabel = new JLabel("Starting Fernies: 75");
+        //singleAgentMode = new JLabel("Multi Agent Mode");
+        //absorbModeLabel = new JLabel("Currently in Absorb Mode");
+        //compModeLabel = new JLabel("Experimental Mode");
+        //JLabel newLineHolder = new JLabel("\n");
+        //settingsPanel.setLayout(new GridLayout(0, 1));
         //,BorderLayout.CENTER
+        //JPanel settingsHolder = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        //settingsPanel.add(newLineHolder);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(worldSize);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(perTurn);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(visRange);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(maxSoldiers);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(startCLabel);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(singleAgentMode);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(absorbModeLabel);
+        //settingsPanel.add(new JLabel("\n"));
+        //settingsPanel.add(compModeLabel);
+        //settingsPanel.add(new JLabel("\n"));
+
+        // ---------------------------------------------------------------------------------------------------
+        //                                        Settings Panel V2
+        // ---------------------------------------------------------------------------------------------------
+        JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel settingsPanel_row1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel settingsPanel_row2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel settingsPanel_row3 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        // --> ADD AGENT
+        addAgentButton = new JButton("<html><center>ADD AGENT</center></html>");
+        styleSettingButton(addAgentButton);
+        addAgentButton.addActionListener(e -> createAddAgentPopup());
+        settingsPanel_row1.add(addAgentButton);
+
+        // --> CHANGE RING SIZE
+        worldSizeButton = new JButton("<html><center>CHANGE RING SIZE<br>(20)</center></html>");
+        styleSettingButton(worldSizeButton);
+        worldSizeButton.addActionListener(e -> {
+            int worldsize = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter new world size:"));
+            wSize = worldsize;
+            worldSizeButton.setText("<html><center>CHANGE RING SIZE<br>(" + worldsize + ")</center></html>");
+        });
+        settingsPanel_row1.add(worldSizeButton);
+
+        // --> CHANGE FERNIE GROWTH PER TURN
+        growthPerTurnButton = new JButton("<html><center>CHANGE FERNIE GROWTH PER TURN<br>(10)</center></html>");
+        styleSettingButton(growthPerTurnButton);
+        growthPerTurnButton.addActionListener(e -> {
+            int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Percent Growth per Turn:"));
+            gpturn = tmp;
+            growthPerTurnButton.setText("<html><center>CHANGE FERNIE GROWTH PER TURN<br>(" + tmp + ")</center></html>");
+        });
+        settingsPanel_row1.add(growthPerTurnButton);
+        
+        // --> CHANGE STARTING FERNIES
+        startingFerniesButton = new JButton("<html><center>CHANGE STARTING FERNIES<br>(75)</center></html>");
+        styleSettingButton(startingFerniesButton);
+        startingFerniesButton.addActionListener(e -> {
+            int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Starting Fernies:"));
+            startcount = tmp;
+            startingFerniesButton.setText("<html><center>CHANGE STARTING FERNIES<br>(" + tmp + ")</center></html>");
+        });
+        settingsPanel_row1.add(startingFerniesButton);
+
+        // --> CHANGE MAX FERNIES PER TILE
+        maxPerTileButton = new JButton("<html><center>CHANGE MAX FERNIES PER TILE<br>(10000)</center></html>");
+        styleSettingButton(maxPerTileButton);
+        maxPerTileButton.addActionListener(e -> {
+            int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Maximum:"));
+            maxNumSoldiers = tmp;
+            maxPerTileButton.setText("<html><center>CHANGE MAX FERNIES PER TILE<br>(" + tmp + ")</center></html>");
+        });
+        settingsPanel_row2.add(maxPerTileButton);
+
+        // --> CHANGE VISIBILITY RANGE
+        visibilityRangeButton = new JButton("<html><center>CHANGE VISIBILITY RANGE<br>(5)</center></html>");
+        styleSettingButton(visibilityRangeButton);
+        visibilityRangeButton.addActionListener(e -> {
+            int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Visibility Range:"));
+            visibility_range = tmp;
+            visibilityRangeButton.setText("<html><center>CHANGE VISIBILITY RANGE<br>(" + tmp + ")</center></html>");
+        });
+        settingsPanel_row2.add(visibilityRangeButton);
+
+        // --> SET SINGLE AGENT MODE
+        singleAgentModeButton = new JButton("<html><center>SET TO SINGLE AGENT MODE</center></html>");
+        styleSettingButton(singleAgentModeButton);
+        singleAgentModeButton.addActionListener(e -> {
+            if (this.singleMode) {
+                this.singleMode = false;
+                singleAgentModeButton.setText("<html><center>SET TO SINGLE AGENT MODE</center></html>");
+            } else {
+                this.singleMode = true;
+                singleAgentModeButton.setText("<html><center>SET TO MULTI AGENT MODE</center></html>");
+            }
+            Component temp = singleAgentModeButton.getParent();
+            temp.revalidate();
+            temp.repaint();
+        });
+        settingsPanel_row2.add(singleAgentModeButton);
+
+        // --> SET ABSORB MODE
+        absorbModeButton = new JButton("<html><center>SET TO ABSORB MODE</center></html>");
+        styleSettingButton(absorbModeButton);
+        absorbModeButton.addActionListener(e -> {
+            if (!this.absorbMode) {
+                this.absorbMode = true;
+                absorbModeButton.setText("<html><center>SET TO ABSORB MODE</center></html>");
+            } else {
+                this.absorbMode = false;
+                absorbModeButton.setText("<html><center>SET TO CANCEL MODE</center></html>");
+            }
+            Component temp = absorbModeButton.getParent();
+            temp.revalidate();
+            temp.repaint();
+        });
+        settingsPanel_row2.add(absorbModeButton);
+
+        // --> SAVE SETTINGS
+        saveSettingsButton = new JButton("<html><center>SAVE SETTINGS</center></html>");
+        styleSettingButton(saveSettingsButton);
+        saveSettingsButton.addActionListener(e -> {
+            // Create popup
+            JDialog dialog = new JDialog(this, "Save Settings", true);
+            dialog.setLayout(new BorderLayout());
+            dialog.setSize(300, 150);
+            dialog.setLocationRelativeTo(this);
+
+            // Create panel with label + text field
+            JPanel savePanelPopup = new JPanel(new FlowLayout());
+            JLabel savePanelLabel = new JLabel("Save Name:");
+            JTextField savePanelField = new JTextField(15);
+            savePanelPopup.add(savePanelLabel);
+            savePanelPopup.add(savePanelField);
+
+            // Create Save button
+            JButton saveButton = new JButton("Save");
+            saveButton.addActionListener(ae -> {
+                String save_name = savePanelField.getText();
+                saveSettings(save_name + ".json");
+                dialog.dispose();
+            });
+
+            // Add components to dialog
+            dialog.add(savePanelPopup, BorderLayout.CENTER);
+            dialog.add(saveButton, BorderLayout.SOUTH);
+
+            dialog.setVisible(true);
+        });
+        settingsPanel_row3.add(saveSettingsButton);
+
+        // --> LOAD SETTINGS
+        loadSettingsButton = new JButton("<html><center>LOAD SETTINGS</center></html>");
+        loadSettingsButton.addActionListener(e -> {
+            File folder = new File("saves/agents/");
+            if (!folder.exists() || !folder.isDirectory()) {
+                JOptionPane.showMessageDialog(this, "No 'saves/agents/' folder found.");
+                return;
+            }
+
+            // Filter for .json files
+            String[] saveFiles = folder.list((dir, name) -> name.endsWith(".json"));
+
+            if (saveFiles == null || saveFiles.length == 0) {
+                JOptionPane.showMessageDialog(this, "No saved settings found in 'saves/agents/' folder.");
+                return;
+            }
+
+            // Show popup with a combo box of files
+            JComboBox<String> fileList = new JComboBox<>(saveFiles);
+            int result = JOptionPane.showConfirmDialog(
+                this,
+                fileList,
+                "Choose Save File",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            if (result == JOptionPane.OK_OPTION) {
+                String selectedFile = (String) fileList.getSelectedItem();
+                loadSettings(selectedFile);  // <- Load selected file
+            }
+        });
+        styleSettingButton(loadSettingsButton);
+        settingsPanel_row3.add(loadSettingsButton);
+
+        Box settingsPanel_container = Box.createVerticalBox();
+        settingsPanel_container.add(settingsPanel_row1);
+        settingsPanel_container.add(settingsPanel_row2);
+        settingsPanel_container.add(settingsPanel_row3);
+
+        settingsPanel.add(settingsPanel_container);
+
         JPanel settingsHolder = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        settingsPanel.add(newLineHolder);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(worldSize);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(perTurn);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(visRange);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(maxSoldiers);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(startCLabel);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(singleAgentMode);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(absorbModeLabel);
-        settingsPanel.add(new JLabel("\n"));
-        settingsPanel.add(compModeLabel);
-        settingsPanel.add(new JLabel("\n"));
+
         settingsHolder.add(settingsPanel);
         menuPanel.add(settingsHolder);
+
         tabbedPane.addTab("Settings", menuPanel);
         
-
         // Display Panel
         JPanel displayPanel = new JPanel(new BorderLayout());
         JToolBar toolBar = new JToolBar();
@@ -628,6 +843,11 @@ public class COREapp extends JFrame {
             addAgentButton(name, location, color);
             
             addAgentDialog.dispose(); // Close the dialog after adding the agent
+            if(agent_set.size() >= 2) {
+                addAgentButton.setEnabled(false);
+            } else {
+                addAgentButton.setEnabled(true);
+            }
         });
 
         JPanel buttonPanel = new JPanel();
@@ -687,6 +907,12 @@ public class COREapp extends JFrame {
             grandparent.remove(agentButton);
             grandparent.revalidate();
             grandparent.repaint();
+
+            if(agent_set.size() >= 2) {
+                addAgentButton.setEnabled(false);
+            } else {
+                addAgentButton.setEnabled(true);
+            }
         });
         agentButtonMenu.add(AgentFaceItem);
         agentButtonMenu.add(AgentLocItem);
@@ -1085,6 +1311,7 @@ public class COREapp extends JFrame {
             }
         }
     }
+    
     private void updateSimulation() {        
         //needs to check if display step < step
         //this.step++;
@@ -1097,6 +1324,7 @@ public class COREapp extends JFrame {
         //System.out.println(this.step);
         simdisplayPanel.repaint(); // Repaint the display panel to show the new state
     }
+    
     private void updateSimulationNoDisplay() {        
         //needs to check if display step < step
         this.step++;
@@ -1114,6 +1342,36 @@ public class COREapp extends JFrame {
         addAgentButton(name, loc, myColor);
     }
 
+private void styleSettingButton(JButton button) {
+    // Base styles
+    button.setFocusPainted(false);
+    button.setContentAreaFilled(true);
+    button.setOpaque(true);
+    button.setPreferredSize(new Dimension(180, 80));
+    button.setFont(new Font("SansSerif", Font.BOLD, 14));
+    button.setHorizontalAlignment(SwingConstants.CENTER);
+    button.setVerticalAlignment(SwingConstants.CENTER);
+    button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+    // Light background
+    button.setBackground(new Color(245, 245, 245)); // Light gray
+
+    // 3D shadow-style border
+    Border outer = BorderFactory.createLineBorder(new Color(180, 180, 180), 2, true); // Outer soft border
+    Border inner = BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.WHITE, Color.LIGHT_GRAY); // 3D effect
+    button.setBorder(BorderFactory.createCompoundBorder(outer, inner));
+
+    // Optional: subtle mouse hover effect
+    button.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+            button.setBackground(new Color(230, 230, 230)); // Lighter gray
+        }
+
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            button.setBackground(new Color(245, 245, 245)); // Original
+        }
+    });
+}
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             COREapp app = new COREapp();
