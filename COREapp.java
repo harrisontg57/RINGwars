@@ -59,6 +59,7 @@ public class COREapp extends JFrame {
     private JButton startingFerniesButton;
     private JButton maxPerTileButton;
     private JButton visibilityRangeButton;
+    private JButton changeNodeOwnerShiftBonusButton;
     private JButton singleAgentModeButton;
     private JButton absorbModeButton;
     private JButton saveSettingsButton;
@@ -359,7 +360,7 @@ public class COREapp extends JFrame {
         settingsPanel_row1.add(worldSizeButton);
 
         // --> CHANGE FERNIE GROWTH PER TURN
-        growthPerTurnButton = new JButton("<html><center>CHANGE FERNIE GROWTH PER TURN<br>(10)</center></html>");
+        growthPerTurnButton = new JButton("<html><center>CHANGE FERNIE GROWTH PERCENT PER TURN<br>(10)</center></html>");
         styleSettingButton(growthPerTurnButton);
         growthPerTurnButton.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Percent Growth per Turn:"));
@@ -398,6 +399,11 @@ public class COREapp extends JFrame {
         });
         settingsPanel_row2.add(visibilityRangeButton);
 
+        // --> CHANGE NODE OWNER SHIFT BONUS
+        changeNodeOwnerShiftBonusButton = new JButton("<html><center>CHANGE NODE OWNER SHIFT BONUS<br>(10)</center></html>");
+        styleSettingButton(changeNodeOwnerShiftBonusButton);
+        settingsPanel_row2.add(changeNodeOwnerShiftBonusButton);
+
         // --> SET SINGLE AGENT MODE
         singleAgentModeButton = new JButton("<html><center>SET TO SINGLE AGENT MODE</center></html>");
         styleSettingButton(singleAgentModeButton);
@@ -413,7 +419,7 @@ public class COREapp extends JFrame {
             temp.revalidate();
             temp.repaint();
         });
-        settingsPanel_row2.add(singleAgentModeButton);
+        //settingsPanel_row2.add(singleAgentModeButton);
 
         // --> SET ABSORB MODE
         absorbModeButton = new JButton("<html><center>SET TO ABSORB MODE</center></html>");
@@ -430,7 +436,7 @@ public class COREapp extends JFrame {
             temp.revalidate();
             temp.repaint();
         });
-        settingsPanel_row2.add(absorbModeButton);
+        //settingsPanel_row2.add(absorbModeButton);
 
         // --> SAVE SETTINGS
         saveSettingsButton = new JButton("<html><center>SAVE SETTINGS</center></html>");
@@ -463,7 +469,7 @@ public class COREapp extends JFrame {
 
             dialog.setVisible(true);
         });
-        settingsPanel_row3.add(saveSettingsButton);
+        settingsPanel_row2.add(saveSettingsButton);
 
         // --> LOAD SETTINGS
         loadSettingsButton = new JButton("<html><center>LOAD SETTINGS</center></html>");
