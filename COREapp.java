@@ -380,12 +380,12 @@ public class COREapp extends JFrame {
         settingsPanel_row1.add(startingFerniesButton);
 
         // --> CHANGE MAX FERNIES PER TILE
-        maxPerTileButton = new JButton("<html><center>CHANGE MAX FERNIES PER TILE<br>(10000)</center></html>");
+        maxPerTileButton = new JButton("<html><center>CHANGE MAX FERNIES PER NODE<br>(10000)</center></html>");
         styleSettingButton(maxPerTileButton);
         maxPerTileButton.addActionListener(e -> {
             int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Maximum:"));
             maxNumSoldiers = tmp;
-            maxPerTileButton.setText("<html><center>CHANGE MAX FERNIES PER TILE<br>(" + tmp + ")</center></html>");
+            maxPerTileButton.setText("<html><center>CHANGE MAX FERNIES PER NODE<br>(" + tmp + ")</center></html>");
         });
         settingsPanel_row2.add(maxPerTileButton);
 
@@ -400,7 +400,7 @@ public class COREapp extends JFrame {
         settingsPanel_row2.add(visibilityRangeButton);
 
         // --> CHANGE NODE OWNER SHIFT BONUS
-        changeNodeOwnerShiftBonusButton = new JButton("<html><center>CHANGE NODE OWNER SHIFT BONUS<br>(10)</center></html>");
+        changeNodeOwnerShiftBonusButton = new JButton("<html><center>CHANGE NODE OWNERSHIP BONUS<br>(10)</center></html>");
         styleSettingButton(changeNodeOwnerShiftBonusButton);
         settingsPanel_row2.add(changeNodeOwnerShiftBonusButton);
 
@@ -607,9 +607,9 @@ public class COREapp extends JFrame {
             preCalcSim(tmp);
         });
         preCalcNItem.setToolTipText("Run the simulation for N steps.  CAREFUL! Test how long 10 steps take before you try 1000 etc..");
-        JMenuItem returnItem = new JMenuItem("Return to Step 0");
+        JMenuItem returnItem = new JMenuItem("Return to Start of Sim");
         returnItem.addActionListener(e -> {
-            returnToStep(0);
+            returnToStep(1);
         });
         JMenuItem returnNItem = new JMenuItem("Return to Step N");
         returnNItem.addActionListener(e -> {
@@ -634,11 +634,11 @@ public class COREapp extends JFrame {
             simdisplayPanel.repaint();
         });
         debug.setToolTipText("Debug mode shows you information about agent actions and gives you node location numbers");
-        simButtonMenu.add(preCalcItem);
-        simButtonMenu.add(preCalcNItem);
+        //simButtonMenu.add(preCalcItem);
+        //simButtonMenu.add(preCalcNItem);
         simButtonMenu.add(returnItem);
         simButtonMenu.add(returnNItem);
-        simButtonMenu.add(setSpeedItem);
+        //simButtonMenu.add(setSpeedItem);
         simButtonMenu.add(debug);
         simMenuBar.add(simButtonMenu);
         simSetButton.add(simMenuBar);
@@ -1062,7 +1062,8 @@ public class COREapp extends JFrame {
         private Image[] otherFaces;
         private HashMap<Integer, Image[]> whichFace;
 
-        private Image rightArrow;
+        private Image clockwiseArrow;
+        private Image counterclockwiseArrow;
     
         // Constructor or initialization block to load the GIF
         public DisplayPanel() {
@@ -1097,7 +1098,8 @@ public class COREapp extends JFrame {
             whichFace.put(3,yellowFaces);
             whichFace.put(4,otherFaces); //add different images later
             //resolve direction arrows
-            rightArrow = new ImageIcon("src/rightArrow.gif").getImage();
+            clockwiseArrow = new ImageIcon("src/redclockwise.gif").getImage();
+            counterclockwiseArrow = new ImageIcon("src/bluecounterclockwise.gif").getImage();
         }
 
         public Image whichFaceGet(int fint) {
@@ -1242,10 +1244,16 @@ public class COREapp extends JFrame {
             g.fillOval(centerX - innerRadius, centerY - innerRadius, 2 * innerRadius, 2 * innerRadius);
 
             //Draw the arrows for resolve direction
-            
-            //if (drawState.resolve_dir == 1) {
-            //    g.drawImage(rightArrow, centerX-20, centerY-20, this);
-            //}
+            int locangle = drawState.resolve_start*arcAngle;
+            double locangleRad = Math.toRadians(locangle/1000);
+            int ngifX = centerX + (int) (radius * 0.7 * Math.cos(locangleRad)) - counterclockwiseArrow.getWidth(this) / 2;
+            int ngifY = centerY - (int) (radius * 0.7 * Math.sin(locangleRad)) - counterclockwiseArrow.getHeight(this) / 2;
+            if (drawState.resolve_dir == 1) {
+                g.drawImage(clockwiseArrow, ngifX, ngifY, this);
+            }
+            if (drawState.resolve_dir == 0) {
+                g.drawImage(counterclockwiseArrow, ngifX, ngifY, this);
+            }
 
             if (drawState.victory & !singleMode) {
                 String victor = "N";

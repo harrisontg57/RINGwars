@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
 
 public class Simulation {
     private int scale; //Size of the ring
@@ -27,6 +28,8 @@ public class Simulation {
     public HashSet<String> active_agents;
     public HashMap<String, Agent_Details> agentLookup;
 
+    public Random rand;
+
     public Simulation(int scale, Agent_Details[] agents, int max_soldiers, int starting_soldiers, int visibility_range, int perTurn, int bonusPerTurn, HashMap<String, Agent_Details> agentLookup){
         this.scale = scale;
 
@@ -42,6 +45,7 @@ public class Simulation {
         this.state_history = new ArrayList<>();
 
         this.agentLookup = agentLookup;
+        this.rand = new Random();
         
         //Agent_Details[] myagents = new Agent_Details[2];
         //Color color = new Color(100,100,50);
@@ -56,7 +60,7 @@ public class Simulation {
         for (Agent_Details a : this.agents) {
             active_agents.add(a.locname);  
         }
-        World_State ws = new World_State(this.world, 0, new ArrayList<>(), false, active_agents, this.step%2);
+        World_State ws = new World_State(this.world, 0, new ArrayList<>(), false, active_agents, this.step%2,0);
         state_history.add(ws);
     }
     
@@ -129,7 +133,7 @@ public class Simulation {
             commands.add(Integer.toString(step));
             commands.add(agent_loc);
             //commands.add(Integer.toString(soldiersPerTurn)); //new soldiers count.
-            commands.add(Integer.toString(new_soldiers));
+            commands.add(Integer.toString(new_soldiers)); //REMOVE THIS!!!!!
             //add on stuff about new number of agents etc
 
             //Create a ProcessBuilder
@@ -292,13 +296,14 @@ public class Simulation {
         }
         //EDGE BATTLES
         int resolve_dir = this.step%2;
+        int resolve_start = this.rand.nextInt(this.scale);
         this.world.resolve(resolve_dir);
 
         //Check for Victory
         //right now it happens when world_state object is created.
 
         //bothMoves_combo actually needs to store the state after the edge battle...
-        World_State ws = new World_State(world, step, bothMoves_combo, false, active_agents,resolve_dir);
+        World_State ws = new World_State(world, step, bothMoves_combo, false, active_agents,resolve_dir,resolve_start);
         state_history.add(ws);
         this.step++;
     }
@@ -325,15 +330,17 @@ public class Simulation {
     public ArrayList<Movement> moves;
     public Boolean victory;
     public int resolve_dir;
+    public int resolve_start;
     public HashSet<String> active_agents;
     public HashMap<String, Integer> player_totals;
-    public World_State(World w, int step, ArrayList<Movement> moves, Boolean victory, HashSet<String> active_agents, int resolve_dir) {
+    public World_State(World w, int step, ArrayList<Movement> moves, Boolean victory, HashSet<String> active_agents, int resolve_dir, int resolve_start) {
         this.step = step;
         //this.superStep = superStep;
         this.counts = new ArrayList<>();
         this.owners = new ArrayList<>();
         this.moves = moves;
         this.resolve_dir = resolve_dir;
+        this.resolve_start = resolve_start;
         this.victory = victory;
         this.active_agents = active_agents;
         this.player_totals = new HashMap<>();
