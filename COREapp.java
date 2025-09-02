@@ -1248,10 +1248,10 @@ public class COREapp extends JFrame {
             double locangleRad = Math.toRadians(locangle/1000);
             int ngifX = centerX + (int) (radius * 0.7 * Math.cos(locangleRad)) - counterclockwiseArrow.getWidth(this) / 2;
             int ngifY = centerY - (int) (radius * 0.7 * Math.sin(locangleRad)) - counterclockwiseArrow.getHeight(this) / 2;
-            if (drawState.resolve_dir == 1) {
+            if (drawState.resolve_dir == 1 & drawState.step != 0) {
                 g.drawImage(clockwiseArrow, ngifX, ngifY, this);
             }
-            if (drawState.resolve_dir == 0) {
+            if (drawState.resolve_dir == 0 & drawState.step != 0) {
                 g.drawImage(counterclockwiseArrow, ngifX, ngifY, this);
             }
 
