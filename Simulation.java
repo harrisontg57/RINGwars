@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Simulation {
     private int scale; //Size of the ring
@@ -221,7 +221,7 @@ public class Simulation {
         }
         if (total_change > newSoldiers) {
             //added too many new soldiers
-            System.out.println(agent.locname + " made an illegal move");
+            System.out.println(agent.locname + " made an illegal move: Moved more than owned");
             return new ArrayList<Movement>(); //return an empty list since there is an illegal move
         }
         //then analyze them
@@ -234,12 +234,12 @@ public class Simulation {
             if (move < 0) {
                 if (state.owner() != agent.locname) {
                     //removing from an opponent
-                    System.out.println(agent.locname + " made an illegal move");
+                    System.out.println(agent.locname + " made an illegal move: removing from an opponent");
                     return new ArrayList<Movement>(); //return an empty list since there is an illegal move
                 }
                 if (state.count() < move*-1) {
                     //too few soldiers to remove that many
-                    System.out.println(agent.locname + " made an illegal move");
+                    System.out.println(agent.locname + " made an illegal move: Removed More than existed on that node");
                     return new ArrayList<Movement>(); 
                 }
             }
