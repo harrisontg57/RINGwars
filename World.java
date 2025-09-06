@@ -166,9 +166,11 @@ public class World {
 
     }
 
-    public void resolve(int direction) {
+    public void resolve(int direction, int rstart) {
+        /* 
         int start = (int) this.numNodes/4; //in future this will be randomized or at least vary
         //starting point is safe from triple battles
+        
         if (direction == 1) {
             //resolve right
             start = start*1; //start at "top"
@@ -177,37 +179,51 @@ public class World {
             //resolve left
             start = start*3; //start at "bottom"
         }
-
+        */
+        int start = rstart;
         if (direction == 1) {
-            //right resolve
-        for (int i = start; i < start + numNodes; i++) {
+            //right resolve (counterclockwise)
+        for (int i = start; i < start + numNodes - 1; i++) {
             Node node  = nodes.get(i%numNodes);
             if (node.getOwner().equals(node.getRight().getOwner()) | node.getOwner().equals("N") | (node.getRight().getOwner().equals("N"))) {
                     continue;
                 } else {
-                    int skip = this.fight_right(node);
+                    int skip = 0;
+                    if (i == start + numNodes - 2) {
+                        //just before the border so no triple battles
+                        skip = this.fight_right(node, true);
+                    } else {
+                        skip = this.fight_right(node, false);
+                    }
                     i = i + skip;
                 }
             }
         } else {
             //left resolve
-            for (int i = start; i > -(numNodes-start); i--) {
+            for (int i = start; i > 1 - (numNodes-start); i--) {
                 //System.out.println((numNodes+i)%numNodes);
                 Node node  = nodes.get((numNodes+i)%numNodes);
                 if (node.getOwner().equals(node.getLeft().getOwner()) | node.getOwner().equals("N") | (node.getLeft().getOwner().equals("N"))) {
                     continue;
                 } else {
-                    int skip = this.fight_left(node);
+                    int skip = 0;
+                    if (i == 2 - (numNodes-start)) {
+                        //just before the border so no triple battles
+                        skip = this.fight_left(node, true);
+                    } else {
+                        skip = this.fight_left(node, false);
+                    }
+                    //int skip = this.fight_left(node);
                     i = i + skip;
                 }
             }
         }
     }
 
-    public int fight_left(Node node) {
+    public int fight_left(Node node, Boolean noTrip) {
         Node lnode = node.getLeft();
         Node llnode = lnode.getLeft();
-        if (llnode.getOwner() == node.getOwner()) {
+        if (llnode.getOwner() == node.getOwner() & !noTrip) {
             //trip battle
             if (lnode.getSoldiers() == node.getSoldiers() + llnode.getSoldiers()) {
                 //all cancel out
@@ -254,11 +270,11 @@ public class World {
     }
     
 
-    public int fight_right(Node node) {
+    public int fight_right(Node node, Boolean noTrip) {
         Node rnode = node.getRight();
         //triple battle logic will need to go first
         Node rrnode = rnode.getRight();
-        if (rrnode.getOwner() == node.getOwner()) {
+        if (rrnode.getOwner() == node.getOwner() & !noTrip) {
             //trip battle
             if (rnode.getSoldiers() == node.getSoldiers() + rrnode.getSoldiers()) {
                 //all cancel out
