@@ -171,7 +171,12 @@ public class Simulation {
             if (move.change < 0) {
                 merged_moves.add(move);
             } else {
-                tmp_map1[(move.loc+move.agent.myStart)%this.scale] = move;
+                if (tmp_map1[(move.loc+move.agent.myStart)%this.scale] == null) {
+                    tmp_map1[(move.loc+move.agent.myStart)%this.scale] = move;
+                } else {
+                    tmp_map1[(move.loc+move.agent.myStart)%this.scale].change = tmp_map1[(move.loc+move.agent.myStart)%this.scale].change + move.change;
+                }
+                
             }
             
         }
@@ -179,7 +184,11 @@ public class Simulation {
             if (move.change < 0) {
                 merged_moves.add(move);
             } else {
-                tmp_map2[(move.loc+move.agent.myStart)%this.scale] = move;
+                if (tmp_map2[(move.loc+move.agent.myStart)%this.scale] == null) {
+                    tmp_map2[(move.loc+move.agent.myStart)%this.scale] = move;
+                } else {
+                    tmp_map2[(move.loc+move.agent.myStart)%this.scale].change = tmp_map2[(move.loc+move.agent.myStart)%this.scale].change + move.change;
+                }
             }
         }
         for (int i = 0; i < this.scale; i++) {
@@ -232,9 +241,10 @@ public class Simulation {
             //System.out.println(i);
             World.Node_State state = aworld.get(i);
             if (move < 0) {
-                if (state.owner() != agent.locname) {
+                if (state.owner() != "Y") {
                     //removing from an opponent
                     System.out.println(agent.locname + " made an illegal move: removing from an opponent");
+                    System.out.println(state.owner());
                     return new ArrayList<Movement>(); //return an empty list since there is an illegal move
                 }
                 if (state.count() < move*-1) {
@@ -296,8 +306,9 @@ public class Simulation {
         }
         //EDGE BATTLES
         int resolve_dir = this.step%2;
-        int resolve_start = this.rand.nextInt(this.scale);
-        this.world.resolve(resolve_dir);
+        //int resolve_start = this.rand.nextInt(this.scale);
+        int resolve_start = 19;
+        this.world.resolve(resolve_dir, resolve_start);
 
         //Check for Victory
         //right now it happens when world_state object is created.
