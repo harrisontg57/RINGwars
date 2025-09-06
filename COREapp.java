@@ -34,6 +34,7 @@ public class COREapp extends JFrame {
     public int startcount;
     public int maxNumSoldiers;
     public int visibility_range;
+    public int ownershipBonusGrowth;
     private JPanel topDisplayPanel; //Panel to hold Reload button
     private JPanel simdisplayPanel;
     public int step; //sim step
@@ -74,6 +75,7 @@ public class COREapp extends JFrame {
         this.sSpeed = 100;
         this.gpturn = 10;
         this.visibility_range = 5;
+        this.ownershipBonusGrowth = 5;
         this.maxNumSoldiers = 10000;
         this.startcount = 75;
         this.step = 0;
@@ -400,8 +402,14 @@ public class COREapp extends JFrame {
         settingsPanel_row2.add(visibilityRangeButton);
 
         // --> CHANGE NODE OWNER SHIFT BONUS
-        changeNodeOwnerShiftBonusButton = new JButton("<html><center>CHANGE NODE OWNERSHIP BONUS<br>(10)</center></html>");
+        changeNodeOwnerShiftBonusButton = new JButton("<html><center>CHANGE NODE OWNERSHIP BONUS<br>(5)</center></html>");
         styleSettingButton(changeNodeOwnerShiftBonusButton);
+        //STUFF GOES HERE
+        changeNodeOwnerShiftBonusButton.addActionListener(e -> {
+            int tmp = Integer.parseInt(JOptionPane.showInputDialog(this, "Enter New Visibility Range:"));
+            ownershipBonusGrowth = tmp;
+            changeNodeOwnerShiftBonusButton.setText("<html><center>CHANGE NODE OWNERSHIP BONUS<br>(" + tmp + ")</center></html>");
+        });
         settingsPanel_row2.add(changeNodeOwnerShiftBonusButton);
 
         // --> SET SINGLE AGENT MODE
@@ -696,7 +704,7 @@ public class COREapp extends JFrame {
         String[] agArray = new String[ ag_names.size() ];
         ag_names.toArray( agArray );
         //this.sim = new Simulation(this.wSize,agArray,agentLookup,gpturn,maxNumSoldiers,startcount,visibility_range,growth_mode,absorbMode);
-        this.sim = new Simulation(this.wSize, this.active_agents, maxNumSoldiers, startcount, visibility_range, gpturn, 5,agentLookup);
+        this.sim = new Simulation(this.wSize, this.active_agents, maxNumSoldiers, startcount, visibility_range, gpturn, ownershipBonusGrowth,agentLookup);
         this.step = 1;
         this.displayStep = 1;
         //this.displaySuperStep = sim.superStep;
@@ -1244,14 +1252,29 @@ public class COREapp extends JFrame {
             g.fillOval(centerX - innerRadius, centerY - innerRadius, 2 * innerRadius, 2 * innerRadius);
 
             //Draw the arrows for resolve direction
-            int locangle = drawState.resolve_start*arcAngle;
+            int mySpot = 0;
+            if (drawState.resolve_dir == 1 & drawState.step != 0) {
+                if (drawState.resolve_start != 0) {
+                    mySpot = drawState.resolve_start; 
+                } else {
+                    mySpot = drawState.counts.size();
+                }
+            }
+            if (drawState.resolve_dir == 0 & drawState.step != 0) {
+                if (drawState.resolve_start != 0) {
+                    mySpot = drawState.resolve_start + 1; 
+                } else {
+                    mySpot = 1;
+                }
+            }
+            int locangle = mySpot*arcAngle;
             double locangleRad = Math.toRadians(locangle/1000);
             int ngifX = centerX + (int) (radius * 0.7 * Math.cos(locangleRad)) - counterclockwiseArrow.getWidth(this) / 2;
             int ngifY = centerY - (int) (radius * 0.7 * Math.sin(locangleRad)) - counterclockwiseArrow.getHeight(this) / 2;
-            if (drawState.resolve_dir == 1 & drawState.step != 0) {
+            if (drawState.resolve_dir == 0 & drawState.step != 0) {
                 g.drawImage(clockwiseArrow, ngifX, ngifY, this);
             }
-            if (drawState.resolve_dir == 0 & drawState.step != 0) {
+            if (drawState.resolve_dir == 1 & drawState.step != 0) {
                 g.drawImage(counterclockwiseArrow, ngifX, ngifY, this);
             }
 
@@ -1312,13 +1335,13 @@ public class COREapp extends JFrame {
                 if (drawState.resolve_dir == 1) {
                     g.drawString("BATTLES COUNTERCLOCKWISE", 10, 70+(yy*10));
                     yy++;
-                    g.drawString("FROM NODE: " + (int) wSize/4, 10, 70+(yy*10));
+                    g.drawString("FROM NODE: " + (int) drawState.resolve_start, 10, 70+(yy*10));
                     yy++;
                 }
                 if (drawState.resolve_dir == 0) {
                     g.drawString("BATTLES CLOCKWISE", 10, 70+(yy*10));
                     yy++;
-                    g.drawString("FROM NODE: " + (int) 3*wSize/4, 10, 70+(yy*10));
+                    g.drawString("FROM NODE: " + (int) drawState.resolve_start, 10, 70+(yy*10));
                     yy++;
                 }
                 
