@@ -306,8 +306,8 @@ public class Simulation {
         }
         //EDGE BATTLES
         int resolve_dir = this.step%2;
-        //int resolve_start = this.rand.nextInt(this.scale);
-        int resolve_start = 19;
+        int resolve_start = this.rand.nextInt(this.scale);
+        //int resolve_start = 19;
         this.world.resolve(resolve_dir, resolve_start);
 
         //Check for Victory
