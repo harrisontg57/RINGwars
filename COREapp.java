@@ -534,12 +534,16 @@ public class COREapp extends JFrame {
         toolBar.setFloatable(false); // Prevents the toolbar from being moved
         ImageIcon bIcon = new ImageIcon("src/back.gif","this is a caption");
         JButton backButton = new JButton(bIcon);
+        backButton.setToolTipText("Back One Step");
         ImageIcon playIcon = new ImageIcon("src/play.gif","this is a caption");
         JButton startButton = new JButton(playIcon);
+        startButton.setToolTipText("Play / Autogenerate new steps");
         ImageIcon pauseIcon = new ImageIcon("src/pause.gif","this is a caption");
         JButton stopButton = new JButton(pauseIcon);
+        stopButton.setToolTipText("Pause");
         ImageIcon fIcon = new ImageIcon("src/forward.gif","this is a caption");
         JButton forwardButton = new JButton(fIcon);
+        forwardButton.setToolTipText("Forward One Step");
         forwardButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -578,7 +582,7 @@ public class COREapp extends JFrame {
         //Image newimg = image.getScaledInstance(25, 25,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
         //reloadIcon = new ImageIcon(image);
         JButton reloadButton = new JButton(reloadIcon);
-        reloadButton.setToolTipText("RELOAD");
+        reloadButton.setToolTipText("Reload the Game.");
         reloadButton.addActionListener(e -> reloadSim());
 
         reloadButton.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED)); // Remove borders
@@ -598,7 +602,7 @@ public class COREapp extends JFrame {
         JMenuBar simMenuBar = new JMenuBar();
         
         JMenu simButtonMenu = new JMenu();
-        simButtonMenu.setToolTipText("Speed and Step Navigation");
+        simButtonMenu.setToolTipText("Gameplay Settings (Including Debug Mode!!!)");
         simButtonMenu.setFocusPainted(true);
         simButtonMenu.setContentAreaFilled(false);
         simButtonMenu.setIcon(pSettingsIcon);
