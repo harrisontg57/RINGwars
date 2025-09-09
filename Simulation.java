@@ -133,7 +133,7 @@ public class Simulation {
             commands.add(Integer.toString(step));
             commands.add(agent_loc);
             //commands.add(Integer.toString(soldiersPerTurn)); //new soldiers count.
-            commands.add(Integer.toString(new_soldiers)); //REMOVE THIS!!!!!
+            //commands.add(Integer.toString(new_soldiers)); //REMOVE THIS!!!!!
             //add on stuff about new number of agents etc
 
             //Create a ProcessBuilder
