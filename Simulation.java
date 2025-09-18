@@ -126,7 +126,13 @@ public class Simulation {
             List<String> commands = new ArrayList<>();
             //commands.add("java");
             if (!agent.getLang().equals("")) {
-                commands.add(agent.getLang());
+                
+                if(agent.getLang().equals("java -jar")) {
+                	commands.add("java");
+                	commands.add("-jar");
+                } else {
+                	commands.add(agent.getLang());
+                }
             }
             
             commands.add(agent_filename);
