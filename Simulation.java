@@ -101,13 +101,31 @@ public class Simulation {
     //reads a given agents move
     //agent name is their actually name / folder loc
     ArrayList<Movement> movements = new ArrayList<>();
+    ArrayList<Movement> movements_blank = new ArrayList<>(); //an empty movement read to return for bad moves
         try (BufferedReader reader = new BufferedReader(new FileReader(agent.locname+"/move.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(","); // Split line into parts
                 // Process the parts array as needed
+                try {
+                    Integer.parseInt(parts[0]);
+                    Integer.parseInt(parts[1]);
+                    
+                } catch (NumberFormatException e) {
+                    System.out.println("Moves not integers: " + e.getMessage());
+                    return movements_blank;
+                }
+
+                if (Integer.parseInt(parts[0]) < 0 || Integer.parseInt(parts[0]) >= this.scale) {
+                    return movements_blank;
+                }
+                if (parts.length != 2) {
+                    return movements_blank;
+                }
+                
                 Movement m = new Movement(Integer.parseInt(parts[0]),Integer.parseInt(parts[1]),agent);
                 movements.add(m); //location
+                
             }
 
         } catch (IOException e) {
@@ -222,13 +240,13 @@ public class Simulation {
     public ArrayList<Movement> check_legal(Agent_Details agent, ArrayList<Movement> moves, int newSoldiers) {
         //checks that all moves in moves are legal and returns an empty array list if any are illegal
         //or the original moves if all are legal
-        
+        System.out.println("checking moves of agent: " + agent.locname);
         //first merge moves so that there's only one per node..
         ArrayList<Integer> total_moves = new ArrayList<>(Collections.nCopies(this.scale, 0)); //this needs to be a full array of the full ring
         int total_change = 0;
         //System.out.println(total_moves.size());
         for (Movement move : moves) {
-            //System.out.println("MOVE: " + move.loc);
+            System.out.println("MOVE: " + move.loc);
             int tmp = total_moves.get(move.loc);
             tmp = tmp + move.change;
             total_moves.set(move.loc, tmp);
